@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
 
 router = APIRouter()
 
 class UserCreate(BaseModel):
-    email: EmailStr
+    email: str
     password: str
     full_name: str
     role: Optional[str] = "student"
@@ -30,7 +30,7 @@ async def register_user(user: UserCreate):
     }
 
 @router.post("/login")
-async def login(email: EmailStr, password: str):
+async def login(email: str, password: str):
     # TODO: Implement actual authentication
     return {
         "access_token": "mock-token",

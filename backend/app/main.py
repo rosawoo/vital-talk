@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import conversations, scenarios, users, feedback
+from app.api import conversations, scenarios, users, feedback, audio
 from app.core.config import settings
 
 app = FastAPI(
@@ -23,6 +23,7 @@ app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(scenarios.router, prefix="/api/scenarios", tags=["scenarios"])
 app.include_router(conversations.router, prefix="/api/conversations", tags=["conversations"])
 app.include_router(feedback.router, prefix="/api/feedback", tags=["feedback"])
+app.include_router(audio.router, prefix="/api/audio", tags=["audio"])
 
 @app.get("/")
 async def root():
