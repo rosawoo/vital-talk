@@ -263,7 +263,44 @@ Because:
 
 ## 🚀 Getting Started
 
-This project is in the planning and design phase.
+### Quick Start
+
+```bash
+# 1. Clone the repository
+cd /Users/rosawu/Documents/vital-talk
+
+# 2. Set up environment variables
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
+
+# 3. Start with Docker Compose
+docker-compose up --build
+
+# 4. Access the application
+# Frontend: http://localhost:3000
+# API Docs: http://localhost:8000/docs
+```
+
+For detailed setup instructions, see [SETUP.md](./SETUP.md)
+
+### Project Structure
+
+```
+vital-talk/
+├── backend/              # FastAPI backend with multi-agent system
+│   ├── app/
+│   │   ├── agents/      # LangGraph agents
+│   │   ├── api/         # API endpoints
+│   │   ├── models/      # Database models
+│   │   └── core/        # Configuration
+│   └── requirements.txt
+├── frontend/            # Next.js frontend
+│   ├── src/
+│   │   ├── app/        # Pages and routes
+│   │   └── components/ # React components
+│   └── package.json
+└── docker-compose.yml   # Container orchestration
+```
 
 ## 📄 License
 
