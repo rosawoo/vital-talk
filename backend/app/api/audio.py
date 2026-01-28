@@ -1,12 +1,14 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from openai import OpenAI
+from openai import OpenAI, OpenAIError
 from app.core.config import settings
 import io
+import logging
 
 router = APIRouter()
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
+logger = logging.getLogger(__name__)
 
 class TTSRequest(BaseModel):
     text: str
@@ -49,7 +51,14 @@ async def speech_to_text(audio_file: UploadFile = File(...)):
             "success": True
         }
     
+    except OpenAIError as e:
+        logger.error(f"OpenAI API error: {str(e)}")
+        error_msg = "Transcription service unavailable. Please check your OpenAI API quota."
+        if hasattr(e, 'code') and e.code == 'insufficient_quota':
+            error_msg = "OpenAI API quota exceeded. Please check your billing details at https://platform.openai.com/account/billing"
+        raise HTTPException(status_code=503, detail=error_msg)
     except Exception as e:
+        logger.error(f"Unexpected error in speech-to-text: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
 
 @router.post("/text-to-speech")
@@ -70,8 +79,9 @@ async def text_to_speech(request: TTSRequest):
             speed=1.0  # Can be adjusted based on emotion (faster for anger, slower for sadness)
         )
         
-        # Stream the audio response
-        audio_bytes = io.BytesIO(response.content)
+        # Read the audio content
+        audio_content = response.read()
+        audio_bytes = io.BytesIO(audio_content)
         
         return StreamingResponse(
             audio_bytes,
@@ -81,7 +91,14 @@ async def text_to_speech(request: TTSRequest):
             }
         )
     
+    except OpenAIError as e:
+        logger.error(f"OpenAI API error: {str(e)}")
+        error_msg = "Text-to-speech service unavailable. Please check your OpenAI API quota."
+        if hasattr(e, 'code') and e.code == 'insufficient_quota':
+            error_msg = "OpenAI API quota exceeded. Please check your billing details at https://platform.openai.com/account/billing"
+        raise HTTPException(status_code=503, detail=error_msg)
     except Exception as e:
+        logger.error(f"Unexpected error in text-to-speech: {str(e)}")
         raise HTTPException(status_code=500, detail=f"TTS generation failed: {str(e)}")
 
 @router.get("/health")
